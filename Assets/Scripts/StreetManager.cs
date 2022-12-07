@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MotorCarreteras : MonoBehaviour
+public class StreetManager : MonoBehaviour
 {
     public GameObject streetContainerGO;
     public GameObject[] streetContainerArray;
@@ -16,6 +16,16 @@ public class MotorCarreteras : MonoBehaviour
     public GameObject previousStreet;
     public GameObject nextStreet;
     public float streetSize;
+    public Vector3 screenLimitSize;
+    public bool outOfScreen;
+
+    public GameObject cameraGO;
+    public Camera myCameraComponent;
+
+    public GameObject carGO;
+    public GameObject audioFXGO;
+    public AudioFX audioFXScript;
+    public GameObject bgFinalGO;
 
     private void Start() 
     {
@@ -26,13 +36,33 @@ public class MotorCarreteras : MonoBehaviour
     {
         if(gameStarted == true && gameEnded == false)
         {
-            transform.Translate(Vector3.down * speed * Time.deltaTime);    
+            transform.Translate(Vector3.down * speed * Time.deltaTime);  
+            
+            if(previousStreet.transform.position.y + streetSize < screenLimitSize.y && outOfScreen == false)
+            {
+                outOfScreen = true;  
+                // Destroy street
+                DestroyStreet();
+            }  
         }
+
     }
     void GameStarted()
     {
         streetContainerGO = GameObject.Find("StreetContainer");
+        cameraGO = GameObject.Find("Main Camera");
+        myCameraComponent = cameraGO.GetComponent<Camera>();
+
+        bgFinalGO = GameObject.Find("GameOverPanel");
+        bgFinalGO.SetActive(false);
+
+        audioFXGO = GameObject.Find("AudioFX");
+        audioFXScript = audioFXGO.GetComponent<AudioFX>();
+
+        carGO = GameObject.FindObjectOfType<Car>().gameObject;
+
         MotorSpeed();
+        MeasureScreenSize();
         SearchStreets();
     }
 
@@ -72,6 +102,8 @@ public class MotorCarreteras : MonoBehaviour
         MeasureStreet();
         nextStreet.transform.position = new Vector3(previousStreet.transform.position.x, 
             previousStreet.transform.position.y + streetSize, 0);
+
+        outOfScreen = false;
     }
 
     void MeasureStreet()
@@ -85,5 +117,25 @@ public class MotorCarreteras : MonoBehaviour
             }
      
         }      
+    }
+
+    void MeasureScreenSize()
+    {
+        screenLimitSize = new Vector3(0, myCameraComponent.ScreenToWorldPoint(new Vector3(0,0,0)).y - 0.5f, 0);
+    } 
+
+    void DestroyStreet()
+    {
+        Destroy(previousStreet);  
+        streetSize = 0; 
+        previousStreet = null;  
+        CreateStreets();
+    }
+
+    public void GameOverStates()
+    {
+        carGO.GetComponent<AudioSource>().Stop();
+        audioFXScript.FXMusic();
+        bgFinalGO.SetActive(true);        
     }
 }
