@@ -18,10 +18,10 @@ public class Stopwatch : MonoBehaviour
         streetManagerGO = GameObject.Find("StreetManager");
         streetManagerScript = streetManagerGO.GetComponent<StreetManager>();
 
-        timeTxt.text = "0:10";
+        timeTxt.text = "2:00";
         distanceTxt.text = "0"; 
 
-        myTime = 10.0f;
+        myTime = 120.0f;
     }
 
     private void Update() 
@@ -36,6 +36,7 @@ public class Stopwatch : MonoBehaviour
             streetManagerScript.gameEnded = true;
             streetManagerScript.GameOverStates();
             finalDistanceTxt.text = ((int)myDistance).ToString() + " mts";
+            timeTxt.text = "0:00";
         }
     }
 
